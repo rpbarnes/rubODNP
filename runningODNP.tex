@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{color}
+\pagestyle{fancy}
+\lhead{New ODNP Commands}
+\rhead{\thepage}
+\cfoot{Ryan Barnes}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\newcommand{\fc}[1]{{\color{blue}\textit{'{#1}'}}}
+
+\title{Running ODNP}
+\author{Ryan Barnes - Songi Han's Lab}
+
+\begin{document}
+\maketitle
+
+
+\section{Setting up and ODNP experiment}
+
+
+
+\section{Observed Bugs with Xepr}
+Yes this software blows, however it's what we have to deal with so we must get through it.
+
+Here I just list a collection of observed bugs that I've noticed and how I've dealt with them in the past. When you observe something that prohibits you from running an experiment there is a chance that I've observed the same bug and have listed a way to deal with it 
+
+
+\begin{enumerate}
+\item {\bf Tuning window is unresponsive and shows a flat line:} I find that when I close and reopen the Xepr software the tuning window no longer responds to commands and shows a flat line, uncharacteristic of the microwave transmission line. \fc{To fix this, I close the software; I turn off the spectrometer and wait a couple seconds then turn the spectrometer back on; I then reopen the software. Now I can see the tuning dip.}
+
+\item {\bf The green button on the console does not stay in:} It seems if you leave the power supply on and the console off for any extended period of time the breaker throws and power is not delivered to the console. \fc{To fix this go to the back of the power supply and flip the switch that is pointing down. This will turn the power to the console back on, once this occurs you can press the green button}
+
+\item {\bf XeprAPI does not initialize in the server:} The server fails to open because the XeprAPI does not find an xepr instance. \fc{To fix this you must go into xepr and enable the XeprAPI. Go Processing -> XeprAPI -> click Enable. The server should now work.}
+
+\end{enumerate}
+\end{document}
+
+
