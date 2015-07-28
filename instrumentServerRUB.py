@@ -12,22 +12,35 @@ print "Initialized power meter connection"
 
 ### Various Functions
 def setAtten(attenuation,*args):#{{{
+    """ Set the microwave attenuation. This connects to the xepr computer via the server and the server hosted on xepr comp issues commands to the EPR bridge via the XeprAPI for python. """
     print "Setting attenuation to ", attenuation
-    subprocess.call(['/home/nmrsu/jf_setmwpower','%0.2f'%attenuation])
+    sendServerCommand('setAttenuation %0.2f'%attenuation)
 #}}}
 
+def sendServerCommand(commandString,ipAddr='134.147.66.2',port=7000):# {{{
+    """ Send a command to the server housed on the Xepr computer. You might want to get a little more fancy with error handling and missed communication but wait until that becomes a problem. """
+    serverAddress = (ipAddr,port)
+    client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    client.connect(serverAddress)
+    client.send(commandString)
+    client.close()
+    # }}}
+
 def csvWrite(fileName,dataToWrite):#{{{
+    """ Write data to file given the csv filename """
     with open(fileName,'wb') as csvFile:
         writer = csv.writer(csvFile,delimiter=',')
         writer.writerows(dataToWrite)
     csvFile.close()
     print "Wrote powers to file %s"%fileName
     return None
-#}}}
+    #}}}
 
 def ampOnOff(state,*args):#{{{
-    subprocess.call(['/opt/topspin/exp/stan/nmr/emxDnp/ampOnOff',state])
-#}}}
+    """ Turn the pulsing on or off depending on the state variable """
+    sendServerCommand(state)
+    #}}}
+
 
 def powerLog(fileName,powerConn,stopEvent,*args):#{{{
     """
@@ -132,13 +145,13 @@ try:
                         powerThreadStop.set()
                     elif mycommand[0] == 'AMPON':
                         try:
-                            ampThread = threading.Thread(target = ampOnOff,args = ('0xFF',1))
+                            ampThread = threading.Thread(target = ampOnOff,args = ('ampOn',1))
                             ampThread.start()
                         except Exception as errtxt:
                             print errtxt
                     elif mycommand[0] == 'AMPOFF':
                         try:
-                            ampThread = threading.Thread(target = ampOnOff,args = ('0x00',1))
+                            ampThread = threading.Thread(target = ampOnOff,args = ('ampOff',1))
                             ampThread.start()
                         except Exception as errtxt:
                             print errtxt
