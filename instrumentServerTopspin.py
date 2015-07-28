@@ -14,7 +14,7 @@ print "Initialized power meter connection"
 def setAtten(attenuation,*args):#{{{
     """ Set the microwave attenuation. This connects to the xepr computer via the server and the server hosted on xepr comp issues commands to the EPR bridge via the XeprAPI for python. """
     print "Setting attenuation to ", attenuation
-    sendServerCommand('setAttenuation %0.2f'%attenuation)
+    sendServerCommand('SETATTEN %0.2f'%attenuation)
 #}}}
 
 def sendServerCommand(commandString,ipAddr='134.147.66.2',port=7000):# {{{
@@ -22,7 +22,7 @@ def sendServerCommand(commandString,ipAddr='134.147.66.2',port=7000):# {{{
     serverAddress = (ipAddr,port)
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     client.connect(serverAddress)
-    client.send(commandString)
+    client.send(commandString +'\n')
     client.close()
     # }}}
 
@@ -145,13 +145,13 @@ try:
                         powerThreadStop.set()
                     elif mycommand[0] == 'AMPON':
                         try:
-                            ampThread = threading.Thread(target = ampOnOff,args = ('ampOn',1))
+                            ampThread = threading.Thread(target = ampOnOff,args = (mycommand[0],1))
                             ampThread.start()
                         except Exception as errtxt:
                             print errtxt
                     elif mycommand[0] == 'AMPOFF':
                         try:
-                            ampThread = threading.Thread(target = ampOnOff,args = ('ampOff',1))
+                            ampThread = threading.Thread(target = ampOnOff,args = (mycommand[0],1))
                             ampThread.start()
                         except Exception as errtxt:
                             print errtxt
