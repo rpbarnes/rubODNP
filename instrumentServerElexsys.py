@@ -8,67 +8,15 @@ import csv
 
 ### Various Functions
 def setAtten(attenuation,*args):#{{{
-    print "Setting attenuation to ", attenuation
-    subprocess.call(['/home/nmrsu/jf_setmwpower','%0.2f'%attenuation])
-#}}}
-
-def csvWrite(fileName,dataToWrite):#{{{
-    with open(fileName,'wb') as csvFile:
-        writer = csv.writer(csvFile,delimiter=',')
-        writer.writerows(dataToWrite)
-    csvFile.close()
-    print "Wrote powers to file %s"%fileName
-    return None
+    print "I receive ", attenuation
 #}}}
 
 def ampOnOff(state,*args):#{{{
-    subprocess.call(['/opt/topspin/exp/stan/nmr/emxDnp/ampOnOff',state])
-#}}}
-
-def powerLog(fileName,powerConn,stopEvent,*args):#{{{
-    """
-    Log powers with the eip power meter 
-    """
-    fileName += '.csv'
-    print fileName
-    timeout = 100
-    powerlist = []
-    timelist = []
-    startTime = time.time()
-    powerConn.read_power()
-    count = 0 
-    timeoutcount = 0 
-    while(not stopEvent.is_set()): # this should let me stop the thread once we're golden
-        try:
-            thispower = powerConn.read_power()
-            powerlist.append(float(thispower))
-        except:
-            print "Got some garbage from the GPIB controller I assume you're talking to it while I'm trying to talk so Ill wait"
-            pass
-        print 'I just recorded: ',thispower
-        timelist.append((time.time()-startTime)) # this will hopefully give us a more human readable time.
-        if thispower <= -99.9:
-            timeoutcount += 1
-            if count > timeout:
-                if timeoutcount >= 40: # the power has been off for atleast 20 seconds lets stop recording the powers
-                    stopEvent.set()
-        time.sleep(.5)
-        count += 1 
-        # An autosave thing to save powers list every 50 points 
-        if int(count/50.) - (count/50.) == 0: # if we're at a multiple of 50 counts save the list
-            dataToWrite = [('time (s)','power (dBm)')] + zip(timelist,powerlist)
-            csvWrite(fileName,dataToWrite)
-            print "I just saved the power file!"
-
-    # once we break the while loop save the data
-    print "I'm saving the recorded powers and times"
-    print "the length of the power and time list is: ", len(powerlist),len(timelist)
-    dataToWrite = [('time (s)','power (dBm)')] + zip(timelist,powerlist)
-    csvWrite(fileName,dataToWrite)
+    print "I receive ", state
 #}}}
 
 #{{{ # Actual server part
-host = ''
+host = '134.147.66.2'
 port = 7000
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -117,15 +65,6 @@ try:
                             attenThread.start()
                         except Exception as errtxt:
                             print errtxt
-                    elif mycommand[0] == 'LOGPOWER':
-                        try:
-                            powerThreadStop = threading.Event()
-                            powerLogThread = threading.Thread(target = powerLog,args = (mycommand[1],powerConn,powerThreadStop,1))
-                            powerLogThread.start()
-                        except Exception as errtxt:
-                            print errtxt
-                    elif mycommand[0] == 'POWERSTOP':
-                        powerThreadStop.set()
                     elif mycommand[0] == 'AMPON':
                         try:
                             ampThread = threading.Thread(target = ampOnOff,args = ('0xFF',1))
