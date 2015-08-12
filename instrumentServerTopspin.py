@@ -6,15 +6,28 @@ import socket
 import os
 import csv
 
-#powerConn = g.gigatronics_powermeter(ip='149.236.99.25')
-#powerLogThread = False
-print "Initialized power meter connection"
+def connectToPowerMeter(gpibaddr=14,ipaddr='134.147.66.3'):
+    try:
+        powerConn = g.gigatronics_powermeter(gpibaddress=gpibaddr,ip=ipaddr)
+    except:
+        raise ValueError("I cannot connect to the power meter! Go turn on the power meter and make sure the gpib device is on!")
+    print "Initialized power meter connection"
+    return powerConn
+
+def testElexsysConn():
+    """ Ping the server on the elexsys computer to make sure there is an established connection. """
+    receivedData = sendServerCommand('Test')
+    if receivedData != 'Received Data':
+        raise ValueError("I cannot connect to the server on the xepr computer! Go start that server and make sure it does not show an error")
+    else:
+        print "Connected to Xepr Computer and ready to go!"
+
 
 ### Various Functions
 def setAtten(attenuation,*args):#{{{
     """ Set the microwave attenuation. This connects to the xepr computer via the server and the server hosted on xepr comp issues commands to the EPR bridge via the XeprAPI for python. """
     print "Setting attenuation to ", attenuation
-    sendServerCommand('SETATTEN %0.2f'%attenuation)
+    receivedData = sendServerCommand('SETATTEN %0.2f'%attenuation)
 #}}}
 
 def sendServerCommand(commandString,ipAddr='134.147.66.2',port=7000):# {{{
@@ -23,7 +36,10 @@ def sendServerCommand(commandString,ipAddr='134.147.66.2',port=7000):# {{{
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     client.connect(serverAddress)
     client.send(commandString +'\n')
+    receivedData = client.recv(1024)
+    print receivedData
     client.close()
+    return receivedData
     # }}}
 
 def csvWrite(fileName,dataToWrite):#{{{
@@ -38,9 +54,8 @@ def csvWrite(fileName,dataToWrite):#{{{
 
 def ampOnOff(state,*args):#{{{
     """ Turn the pulsing on or off depending on the state variable """
-    sendServerCommand(state)
+    receivedData = sendServerCommand(state)
     #}}}
-
 
 def powerLog(fileName,powerConn,stopEvent,*args):#{{{
     """
@@ -59,12 +74,12 @@ def powerLog(fileName,powerConn,stopEvent,*args):#{{{
         try:
             thispower = powerConn.read_power()
             powerlist.append(float(thispower))
+            timelist.append((time.time())) # this will hopefully give us a more human readable time.
         except:
             print "Got some garbage from the GPIB controller I assume you're talking to it while I'm trying to talk so Ill wait"
             pass
         print 'I just recorded: ',thispower
-        timelist.append((time.time()-startTime)) # this will hopefully give us a more human readable time.
-        if thispower <= -99.9:
+        if thispower <= -60.9:
             timeoutcount += 1
             if count > timeout:
                 if timeoutcount >= 40: # the power has been off for atleast 20 seconds lets stop recording the powers
@@ -87,6 +102,9 @@ def powerLog(fileName,powerConn,stopEvent,*args):#{{{
 #{{{ # Actual server part
 host = '0.0.0.0'
 port = 7000
+powerConn = connectToPowerMeter()
+powerLogThread = False
+testElexsysConn()
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((host,port)) 
