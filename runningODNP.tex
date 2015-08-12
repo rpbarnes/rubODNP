@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{fancyhdr}
 \usepackage{color}
+\usepackage{cite}
 \pagestyle{fancy}
 \lhead{New ODNP Commands}
 \rhead{\thepage}
@@ -15,16 +16,52 @@
 \begin{document}
 \maketitle
 
+\section{Outline of Experimental Setup}
+This document attempts to explain how to run the ODNP experiment on the setup at Ruhr Universitat Bochum. This section is more of a theoretical explination of how everything works and how each item in orchestrated into the bigger picture. See section~\ref{sec:runningODNP} for the practical outline on setting up and running the experiment.
+
+The ODNP experiment is primarily an NMR experiment in that we measure the NMR signal, but enahancement and $T_1$ of the proton of water as a function of microwave power so all that is done on the EPR side is to change the microwave power. Therefore this experiment is primarily run by TOPSPIN however the experiment is also dependent on Xepr to set the microwave power which is managed by TOPSPIN through an instrument server.
+
+\subsection{Enhancement Measurement}
+In the ODNP experiment it is necessary to measure the NMR signal enhancement as a function of microwave power. We measure the NMR signal enhancement via the integral of the Fourier Transform of the FID. We typically use a 4 step CYCLOPS phase cycle for each enhancement measurement at a given microwave power. Note that the CYCLOPS routine is just to eliminate an offsets due to the IQ mixer and such.
+
+We measure the NMR signal enhancement for a given power setting, see section~\ref{sec:micPower}. We also record the microwave power throughout the enhancement measurement for a given power setting, see section~\ref{sec:measPower}. To calculate the overall signal enhancement we plot the integral of the NMR signal against the corresponding microwave power, we extrapolate this to infinite power and whalahh.
+
+In the experiment file the enhancement measurements start at experiment 5 and continue to 5 + the number of enhancement steps (defined in the exp setup)
+
+\subsection{$T_1$ Measurement}
+In the ODNP measurement we measure the nuclear $T_1$ as a function of the microwave power as well. This is an attempt to correct for the temperature change during the experiment ~\cite{Franck2013}.
 
 
-\section{Introduction}
-This document attempts to explain how to run the ODNP experiment on the setup at Ruhr Universitat Bochum.
+\subsection{Setting Microwave Power}
+\label{sec:micPower}
+This is taken care of automatically by the ODNP code \fc{'dnpexp'} as well as \fc{'mwpower'} which just sets the microwave power and amplifier state. Both commands \fc{'dnpexp'} and \fc{'mwpower'} are issued in the TOPSPIN command line as this is the main user interface.
+
+TOPSPIN issues the microwave power setting commands to the Xepr software via the instrument servers, see section~\ref{sec:instServer}. Xepr ultimately is the program that controls the microwave power adjustment. This is done via adjusting the high power attenuation setting in pulse mode.
+
+
+
+\subsection{Measuring Microwave Power}
+\label{sec:measPower}
+
+We measure the microwave power with the gigatronics microwave power meter. It's necessary to sample the microwave power after the high power amplifier so right now the sampling occurs between the microwave bridge output and the cavity. This isn't ideal as it reduces the cw-EPR signal to noise by about 85\% which isn't good.
+
+
+
+\subsection{Instrument Servers}
+\label{sec:instServer}
+For the setup in Bochum two instrument servers are required each running on it's own computer. That is one runs on the TOPSPIN computer and one runs on the Xepr computer and they're named accordingly 'instrumentServerTopspin.py' and 'instrumentServerElexsys.py' and they're both stored in the rubODNP directory on each computer. If you note both computers hold an identical copy of the directory, as the directory is managed by git. As you may be able to tell both servers are python programs, as python is awesome!
+
+The server running on the TOPSPIN computer is the parent or the 'main hub' this server listens for commands from TOPSPIN and parses commands either to the Xepr server (for setting the microwave power) or to the power meter (for measuring microwave power).
+
+TOPSPIN communicates to the server on the TOPSPIN computer via a TCP/IP communication, in reality the TOPSPIN program can talk just as easilly to the server on the Xepr computer I just thought it better to have all communication go through one server. In this format TOPSPIN gives commands to the server but does not recieve commands from the server
+
+Xepr only receives commands from the server on the Xepr computer and does not issue commands to either server. Really because Xepr sucks and there is no reason for it. Communication between Xepr and the server occurs via the XeprAPI which is Bruker's method of allowing python to manage the Xepr platform.
 
 
 
 
-
-\section{Setting up and running the ODNP experiment}
+\section{Setting up and Running The ODNP Experiment}
+\label{sec:runningODNP}
 
 
 
@@ -44,6 +81,9 @@ Here I just list a collection of observed bugs that I've noticed and how I've de
 \item {\bf XeprAPI does not initialize in the server:} The server fails to open because the XeprAPI does not find an xepr instance. \fc{To fix this you must go into xepr and enable the XeprAPI. Go Processing -> XeprAPI -> click Enable. The server should now work.}
 
 \end{enumerate}
+
+\bibliography{references}{}
+\bibliographystyle{plain}
 \end{document}
 
 
