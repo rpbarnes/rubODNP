@@ -8,15 +8,7 @@ import csv
 
 
 ### Various Functions
-def setAtten(attenuation,currExp,*args):#{{{
-    """ Set the attenuation of the high power attenuator and restart the experiment. """
-    print "I receive and set attenuation to %d dB"%attenuation
-    currExp.aqExpAbort() # the only reason I do this is to prevent the program from stopping on me. This way I have 60 min (set by the 'a' variable in pulsespel).
-    currExp['Attenuation'].value = float(attenuation)
-    currExp.aqExpRun()
-#}}}
-
-def makeConnectionGetExperiment():
+def makeConnectionGetExperiment():#{{{
     """ Connect to xepr and get the current experiment.
         You should put in some way of checking that the current experiment is the correct one.
     """
@@ -25,15 +17,26 @@ def makeConnectionGetExperiment():
     currExp = xepr.XeprExperiment()
     print "Received the current experiment"
     return xepr,currExp
+#}}}
 
-def stopExperiment(currExp,*args):
+def setAtten(attenuation,currExp,*args):#{{{
+    """ Set the attenuation of the high power attenuator and restart the experiment. """
+    print "I receive and set attenuation to %d dB"%attenuation
+    currExp.aqExpAbort() # the only reason I do this is to prevent the program from stopping on me. This way I have 60 min (set by the 'a' variable in pulsespel).
+    currExp['Attenuation'].value = float(attenuation)
+    currExp.aqExpRun()
+#}}}
+
+def stopExperiment(currExp,*args):#{{{
     """ Stop the pulsing in xepr. Turn off the microwave output """
     currExp.aqExpAbort()
+#}}}
 
-def startExperiment(currExp,*args):
+def startExperiment(currExp,*args):#{{{
     """ Start pulsing in xepr. This is called to let the amplifier warm up at full power attenuation. """
     currExp['Attenuation'].value = 60
     currExp.aqExpRun()
+#}}}
 
 #{{{ # Actual server part
 xepr,currExp = makeConnectionGetExperiment()
@@ -105,9 +108,7 @@ except KeyboardInterrupt:
     s.close()
     print "Closed socket connection.\n"
     currExp.aqExpAbort()
-    del xepr
-    del currExp
-    print "Deleted xepr and experiment instances.\n"
+    print "Stopped the current experiment.\n"
     print "Goodbye Dave\n\n"
 #}}}
             
