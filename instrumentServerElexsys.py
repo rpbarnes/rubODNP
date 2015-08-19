@@ -23,18 +23,24 @@ def setAtten(attenuation,currExp,*args):#{{{
     """ Set the attenuation of the high power attenuator and restart the experiment. """
     print "I receive and set attenuation to %d dB"%attenuation
     currExp.aqExpAbort() # the only reason I do this is to prevent the program from stopping on me. This way I have 60 min (set by the 'a' variable in pulsespel).
+    time.sleep(0.2)
     currExp['Attenuation'].value = float(attenuation)
+    time.sleep(0.2)
     currExp.aqExpRun()
+    time.sleep(0.2)
 #}}}
 
 def stopExperiment(currExp,*args):#{{{
     """ Stop the pulsing in xepr. Turn off the microwave output """
+    time.sleep(0.2)
     currExp.aqExpAbort()
 #}}}
 
 def startExperiment(currExp,*args):#{{{
     """ Start pulsing in xepr. This is called to let the amplifier warm up at full power attenuation. """
+    time.sleep(0.2)
     currExp['Attenuation'].value = 60
+    time.sleep(0.2)
     currExp.aqExpRun()
 #}}}
 
