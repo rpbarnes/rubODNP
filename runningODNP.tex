@@ -121,7 +121,7 @@ Here I just list a collection of observed bugs that I've noticed and how I've de
 
 \item {\bf The green button on the console does not stay in:} It seems if you leave the power supply on and the console off for any extended period of time the breaker throws and power is not delivered to the console. \fc{To fix this go to the back of the power supply and flip the switch that is pointing down. This will turn the power to the console back on, once this occurs you can press the green button}
 
-\item {\bf XeprAPI does not initialize in the server:} The server fails to open because the XeprAPI does not find an xepr instance. \fc{To fix this you must go into xepr and enable the XeprAPI. Go Processing -> XeprAPI -> click Enable. The server should now work.}
+\item {\bf XeprAPI does not initialize in the server:} The server fails to open because the XeprAPI does not find an xepr instance. \fc{To fix this you must go into xepr and enable the XeprAPI. Go Processing -> XeprAPI -> click Enable. The server should now work. If this still doesn't work it's probably because something has the xepr instance. Close any terminal application that could have had xepr. I notice if I run xepr from python and <ctrl-c> exit that python program it doesn't let go of the xepr and I must close that terminal window completely to re-access xepr}
 
 \end{enumerate}
 
