@@ -58,6 +58,49 @@ TOPSPIN communicates to the server on the TOPSPIN computer via a TCP/IP communic
 Xepr only receives commands from the server on the Xepr computer and does not issue commands to either server. Really because Xepr sucks and there is no reason for it. Communication between Xepr and the server occurs via the XeprAPI which is Bruker's method of allowing python to manage the Xepr platform.
 
 
+\subsection{File Locations}
+\label{sec:fileLocs}
+The files pertinent to the ODNP experiment are contained in different locations on both computers because well my organization blows... Any way the instrument servers are stored in the rubODNP folder. On the topspin box this is in \fc{C:/Projects/rubODNP} on the xepr box this is in the \fc{/home/xuser/Projects/rubODNP}.
+
+I store the ODNP pulse program and variable defs for xepr in \fc{/home/xuser/xeprFiles/PulseSPEL/sharedPulseSPEL/standard/dnpElexsys/}.
+
+I store the code to run the ODNP experiment, make a new experiment file, run $T_1$ experiments, and set the microwave power in \fc{C:/Bruker/TopSpin3.2/exp/stan/nmr/au/src}. Note all of the files are written in c. If you change or edit any of the files all you need to do to compile the files is to write the filename in the topspin command window and it will compile the file and run it. I go through what each of these files are used for in section~\ref{sec:odnpCommands}
+
+
+
+\subsection{ODNP Specific Topspin Commands}
+\label{sec:odnpCommands}
+
+There are a couple of commands that can be called from the Topspin command line that are pertinent to setting up and running the ODNP experiment. I go through these commands here. All of the scripts are housed in \fc{C:/Bruker/TopSpin3.2/exp/stan/nmr/au/src}, for example the code for the command mwpower is stored in a script called mwpower.
+
+\subsubsection{mwpower}
+The command \fc{mwpower} sets the attenuation of the high power attenuator in the bridge as well as the state of the microwave bridge. You can use this to manually adjust the power of the microwave output as well as turn the microwave output on or off. 
+
+The command operates by communicating with both the server on the Topspin computer and the xepr computer. The commands are initially parsed in the script executed by topspin and sent to the server running on the topspin computer. The server on the topspin computer interprets the command as something for the xepr software and passes the command along to xepr. In all cases the server on the topspin computer is the parent and the server on the xepr computer is the child.
+
+
+\subsubsection{newexp}
+The command \fc{newexp} copies experiment numbers 1-5 in the currently selected experiment directory and deletes any data stored in the experiment. Experiments 1-5 are templates for the ODNP experiment. This is a handy tool to just make sure everything that you need for a successful ODNP experiment is copied successfully from a previous ODNP experiment.
+
+\subsubsection{dnpexp}
+The command \fc{dnpexp} is what actually runs the ODNP experiment. This will run the NMR enhancement as a function of microwave power automatically. This will also run the NMR $T_1$ as a function of microwave power. This command will output data in the form that can be worked up by Ryan's workup software.
+
+The command will grab all of the optimization parameters given in experiment 1. This includes the RF (SFO1), pulse power (PLW1), and pulse length (P1) and copy these parameters to the template files for the enhancement series (experiment 5) and the $T_1$ series (experiment 4).
+
+The experiment proceedes as follows:
+\begin{enumerate}
+	\item{Check the receiver noise}
+	\item{Measure the thermal NMR signal, exp 5}
+	\item{Let the amplifier warm up}
+	\item{Measure the enhancement series, exp 6 - number of attenuation steps + 6}
+	\item{Turn the microwave pulsing off and let the sample cool down}
+	\item{Measure the zero power $T_1$, exp 304}
+	\item{Let the amplifier warm up}
+	\item{Measure the $T_1$ of power series, exp (number of attenuation steps + 6) - exp (number of attenuation steps + 6 + t1type)}
+\end{enumerate}
+
+There are several parameters that one could edit to change the odnp experiment.
+
 
 
 \section{Setting up and Running The ODNP Experiment}
