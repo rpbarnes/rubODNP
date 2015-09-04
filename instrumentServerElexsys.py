@@ -37,9 +37,7 @@ def stopExperiment(currExp,*args):#{{{
 #}}}
 
 def startExperiment(currExp,*args):#{{{
-    """ Start pulsing in xepr. This is called to let the amplifier warm up at full power attenuation. """
-    time.sleep(0.2)
-    currExp['Attenuation'].value = 60
+    """ Start pulsing in xepr. This is called to let the amplifier warm up. """
     time.sleep(0.2)
     currExp.aqExpRun()
 #}}}
