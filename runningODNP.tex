@@ -1,14 +1,17 @@
 \documentclass{article}
 \usepackage{fancyhdr}
 \usepackage{color}
+\usepackage{geometry}
 \usepackage{cite}
 \pagestyle{fancy}
-\lhead{New ODNP Commands}
+\lhead{Overhauser Dynamic Nuclear Polarization}
 \rhead{\thepage}
 \cfoot{Ryan Barnes}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 \newcommand{\fc}[1]{{\color{blue}\textit{'{#1}'}}}
+\textwidth = 450pt
+\textheight = 650pt
 
 \title{Running ODNP}
 \author{Ryan Barnes - Songi Han's Lab}
@@ -62,9 +65,11 @@ Xepr only receives commands from the server on the Xepr computer and does not is
 \label{sec:fileLocs}
 The files pertinent to the ODNP experiment are contained in different locations on both computers because well my organization blows... Any way the instrument servers are stored in the rubODNP folder. On the topspin box this is in \fc{C:/Projects/rubODNP} on the xepr box this is in the \fc{/home/xuser/Projects/rubODNP}.
 
-I store the ODNP pulse program and variable defs for xepr in \fc{/home/xuser/xeprFiles/PulseSPEL/sharedPulseSPEL/standard/dnpElexsys/}.
+I store the ODNP pulse program and variable defs for xepr in \\ \fc{/home/xuser/xeprFiles/PulseSPEL/sharedPulseSPEL/standard/dnpElexsys/}.
 
-I store the code to run the ODNP experiment, make a new experiment file, run $T_1$ experiments, and set the microwave power in \fc{C:/Bruker/TopSpin3.2/exp/stan/nmr/au/src}. Note all of the files are written in c. If you change or edit any of the files all you need to do to compile the files is to write the filename in the topspin command window and it will compile the file and run it. I go through what each of these files are used for in section~\ref{sec:odnpCommands}
+I store the code to run the ODNP experiment, make a new experiment file, run $T_1$ experiments, and set the microwave power in \\ \fc{C:/Bruker/TopSpin3.2/exp/stan/nmr/au/src}. Note all of the files are written in c. If you change or edit any of the files all you need to do to compile the files is to write the filename in the topspin command window and it will compile the file and run it. I go through what each of these files are used for in section~\ref{sec:odnpCommands}
+
+All of the NMR experiments that are ran by topspin are stored in the directory \fc{C:/NMRUserData/}
 
 
 
@@ -106,6 +111,50 @@ There are several parameters that one could edit to change the odnp experiment.
 \section{Setting up and Running The ODNP Experiment}
 \label{sec:runningODNP}
 
+\subsection{Sample Prep}
+\begin{enumerate}
+    \item Cut a cappilary using the cermaic cutting square to a length where the capillary sticks out of the bottom of the NMR probe by approximately 2 mm.
+    \item Place $4 \mu L$ of sample into the capillary.
+    \item Seal the sample end of the capillary with critoseal. The sample end is the side of the capillary that you placed the sample in.
+    \item Seal the other side of the capillary, the side with air, with hot wax.
+    \item Put a touch of wax on the critoseal side of the capillary. This will help hold the sample in the NMR probe.
+\end{enumerate}
+
+\subsection{Put Sample in Cavity}
+\begin{enumerate}
+    \item Bring up the tuning window in Xepr, in tune mode so you see the dip.
+    \item Place the sample into the NMR probe. The critoseal side goes to the top of the probe.
+    \item Slide the NMR probe into the cavity. Make sure the $B_1$ of the NMR probe is oriented appropriately relatively to the static field of the magnet.
+    \item Check and make sure the tuning dip is still there. The position of the probe in the cavity should be such that the probe sits in the center of the cavity. \fc{With some resonators, not this 'high Q' unfortunately, you can tell by the dip where the sample is. For this resoantor just mark the position of the probe with a sharpie or something.}
+\end{enumerate}
+\subsection{Run a CW EPR experiment}
+\begin{enumerate}
+    \item Critically couple the epr cavity, manual tune seems to work best but what ever you prefer.
+    \item Open a cw experiment. Go to Aquisition $\rightarrow$ New Experiment $\rightarrow$ select the cw tag and name the experiment \fc{'cw'} or something that you remember because you will select this later when you set up another experiment.
+    \item Run the cw experiment.
+    \item Note the field of the central transition. \fc{You will set the static field to this value later.}
+\end{enumerate}
+
+\subsection{Configure Xepr to run ODNP - XeprAPI}
+\begin{enumerate}
+    \item Create a new advanced pulse experiment. Name this \fc{odnp} so you know which one it is.
+    \item Set the bridge to pulse mode.
+    \item Open the ODNP pulseSPEL experiment and compile it. To open it go to \fc{Aquisition} in the experiment options, click the \fc{PulseSPEL} button, the click \fc{Load Program}. Navigate to \\ \fc{/home/xuser/xeprFiles/PulseSPEL/sharedPulseSPEL/Standard/dnpElexsys/} and open \fc{DNP\_contShot.exp}. Then click \fc{Compile}.
+    \item Open the variable definitions by clicking \fc{Load Var Defs} in the PulseSPEL window. Open the file \fc{DNP\_contShot.def} in the same folder as the pulse program and compile it by clicking \fc{compile}.
+    \item Set the static field to the center field of the cw EPR spectrum. Go to the experimental parameters window and open the \fc{Field} tab. Set the field to the center field and make sure the field is shown in the lower box as set to the appropriate value and is shown in green.
+    \item Enable the XeprApi. Go to \fc{Processing} $\rightarrow$ \fc{XeprAPI} $\rightarrow$ \fc{Enable Xepr API}.
+    \item Start the server that runs on the Xepr computer. Open a terminal and navigate to \fc{/home/xuser/Projects/rubODNP/} and start the instrument server by typing \fc{python2.7 instrumentServerElexsys.py}. You can also tab complete so you don't have to type everything. Note that you should see that the instrument server got the connection to Xepr. If you did not get a connection to xepr close all terminal windows and try again.
+\end{enumerate}
+\subsection{Setting up the NMR - TOPSPIN}
+\begin{enumerate}
+    \item Go to the other computer and open the Topspin program, it's on the desktop. The password for all accounts is \textit{topspin} all lowercase. Log into the \textit{nmrsu} account.
+    \item Go to the last successful ODNP experiment contained in the EnricaBordignon directory and open experiment 1 and click on the 1 that pops up below. you should see an nmr peak in the window.
+    \item Create a new experiment by typing \fc{newexp} in the command window. Enter the name of the new experiment you would like to create and click enter
+    \item Navigate to the newly created experiment by clicking the minus box next to the name of the directory and ropening the directory. Go to the new experiment and open experiment 1 and double click the 1 that pops up below. Again you should see an NMR peak.
+    \item Run an NMR fid experiment by typing zg into the command line. \bf{If you don't see an FID your sample has fallen out or the rf isn't on resonance with the magnetic field magnetic field. Check to make sure the magnetic field is set to the center of the EPR spectrum. Also check that the rf is close to the magnetic field resonance. The ratio for this magnet is $0.004218 \frac{MHz}{G}$ this should get you close.}
+    \item Take the ft of the FID by typing \fc{efp} into the command line. You should see a peak.
+\end{enumerate}
+\subsection{Enable the topspin server and check for Enhancemnet}
 
 
 \section{Observed Bugs with Xepr}
