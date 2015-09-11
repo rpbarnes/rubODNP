@@ -18,6 +18,8 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
+\newpage
 
 \section{Outline of Experimental Setup}
 This document attempts to explain how to run the ODNP experiment on the setup at Ruhr Universitat Bochum. This section is more of a theoretical explination of how everything works and how each item in orchestrated into the bigger picture. See section~\ref{sec:runningODNP} for the practical outline on setting up and running the experiment.
@@ -143,7 +145,7 @@ There are several parameters that one could edit to change the odnp experiment.
     \item Open the variable definitions by clicking \fc{Load Var Defs} in the PulseSPEL window. Open the file \fc{DNP\_contShot.def} in the same folder as the pulse program and compile it by clicking \fc{compile}.
     \item Set the static field to the center field of the cw EPR spectrum. Go to the experimental parameters window and open the \fc{Field} tab. Set the field to the center field and make sure the field is shown in the lower box as set to the appropriate value and is shown in green.
     \item Enable the XeprApi. Go to \fc{Processing} $\rightarrow$ \fc{XeprAPI} $\rightarrow$ \fc{Enable Xepr API}.
-    \item Start the server that runs on the Xepr computer. Open a terminal and navigate to \fc{/home/xuser/Projects/rubODNP/} and start the instrument server by typing \fc{python2.7 instrumentServerElexsys.py}. You can also tab complete so you don't have to type everything. Note that you should see that the instrument server got the connection to Xepr. If you did not get a connection to xepr close all terminal windows and try again.
+    \item Start the server that runs on the Xepr computer. Open a terminal and navigate to\\ \fc{/home/xuser/Projects/rubODNP/} and start the instrument server by typing \fc{python2.7 instrumentServerElexsys.py}. You can also tab complete so you don't have to type everything. Note that you should see that the instrument server got the connection to Xepr. If you did not get a connection to xepr close all terminal windows and try again.
 \end{enumerate}
 \subsection{Setting up the NMR - TOPSPIN}
 \begin{enumerate}
@@ -152,9 +154,25 @@ There are several parameters that one could edit to change the odnp experiment.
     \item Create a new experiment by typing \fc{newexp} in the command window. Enter the name of the new experiment you would like to create and click enter
     \item Navigate to the newly created experiment by clicking the minus box next to the name of the directory and ropening the directory. Go to the new experiment and open experiment 1 and double click the 1 that pops up below. Again you should see an NMR peak.
     \item Run an NMR fid experiment by typing zg into the command line. \bf{If you don't see an FID your sample has fallen out or the rf isn't on resonance with the magnetic field magnetic field. Check to make sure the magnetic field is set to the center of the EPR spectrum. Also check that the rf is close to the magnetic field resonance. The ratio for this magnet is $0.004218 \frac{MHz}{G}$ this should get you close.}
-    \item Take the ft of the FID by typing \fc{efp} into the command line. You should see a peak.
+    \item Take the ft of the FID by typing \fc{efp} into the command line. You should see a peak. You can phase correct this by typing \fc{apk}.
+    \item Center the NMR spectrum. Click on the red arrow on the top of the window and use the red line to mark where your center peak is.
+    \item Tune the NMR cavity. Type \fc{wobb} and use the capacitors to center the dip.
+    \item run another NMR make sure everything looks peachy.
 \end{enumerate}
 \subsection{Enable the topspin server and check for Enhancemnet}
+\begin{enumerate}
+    \item Open up git. Go start and type \fc{git}. 
+    \item Go to the instrument server directory. Type \fc{cd /c/Projects/rubODNP/}.
+    \item start the server. Type \fc{python instrumentServerTopspin.py}
+    \item Go back to the Topspin and set the mw power by typing in \fc{mwpower}. Use an attenuation setting of 5 or so and turn the amplifier on.
+    \item Run an NMR experiment. \fc{zg} \fc{efp}. You should see some enhancement.
+\end{enumerate}
+\subsection{Start the ODNP experiment}
+\begin{enumerate} 
+    \item Start the ODNP experiment by typing in \fc{dnpexp}.
+\end{enumerate}
+
+
 
 
 \section{Observed Bugs with Xepr}
